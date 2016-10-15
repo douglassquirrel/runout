@@ -19,5 +19,3 @@
   (seconds->pure-date (+ (date->seconds d) (days->seconds n))))
 
 (define days-from-today (curry add-days (current-pure-date)))
-
-(display (days-from-today 21))
