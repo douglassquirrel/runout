@@ -1,15 +1,26 @@
 #lang racket/base
 
 (require racket/cmdline
+         racket/file
+         racket/function
          racket/list
          "day-arith.rkt"
-         "format-date.rkt")
+         "format-date.rkt"
+         "item.rkt"
+         "util.rkt")
 
-(define (run-out stock dose)
-  (format-date (days-from-today (quotient stock dose))))
+(define (get-stock i)
+  (printf "~a: How many are in stock?\n" (item-name i))
+  (struct-copy item i (stock (read-integer))))
 
-(define args (command-line #:args args args))
-(define stock (string->number (first args)))
-(define dose (string->number (second args)))
+(define (compute-last-day i)
+  (define days-left (quotient (item-stock i) (item-usage i)))
+  (define ld (days-from-today days-left))
+  (struct-copy item i (last-day ld)))
 
-(displayln (run-out stock dose))
+(define process-item (compose compute-last-day get-stock))
+
+(define items-filename (car (command-line #:args args args)))
+(define items (map (curry apply init-item) (file->value items-filename)))
+
+(for-each print-item (map process-item items))
